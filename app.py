@@ -5,7 +5,6 @@ import io
 
 
 
-
 csv = '''
 beverage,price
 orange juice,2.5
@@ -29,6 +28,21 @@ SELECT * FROM beverages
 CROSS JOIN food_items
 """
 solution = duckdb.sql(answer).df()
+
+
+st.write("""
+# SQL SRS
+Spaced Repetition System SQL Practice
+""")
+
+with st.sidebar:
+    option = st.selectbox(
+        "What would you like to review",
+        ("Joins", "GroupBy", "Windows Functions"),
+        index=None,
+        placeholder="Select a theme...",
+    )
+    st.write("You selected:", option)
 
 
 
