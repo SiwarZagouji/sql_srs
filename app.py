@@ -1,13 +1,9 @@
+import ast
+
 import duckdb
 import streamlit as st
 
 con = duckdb.connect(database="data/exercises_sql_tables.duckdb", read_only=False)
-
-# answer_str = """
-# SELECT * FROM beverages
-# CROSS JOIN food_items
-# """
-# solution_df = duckdb.sql(answer_str).df()
 
 st.write(
     """
@@ -25,15 +21,15 @@ with st.sidebar:
     )
 
     st.write("You selected:", theme)
-    exercice = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}' ").df()
-    st.write(exercice)
+    exercise = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}' ").df()
+    st.write(exercise)
 
 
 st.header("Enter your code")
 query = st.text_input(label="your SQL code here", key="user_input")
-# if query:
-#     result = duckdb.query(query)
-#     st.dataframe(result)
+if query:
+    result = con.execute(query).df()
+    st.dataframe(result)
 #
 #     if len(result.columns) != len(solution_df.columns):
 #         st.write("The number of columns is wrong")
@@ -46,15 +42,19 @@ query = st.text_input(label="your SQL code here", key="user_input")
 #         st.write("Some columns are missing")
 #
 #
-# tab1, tab2 = st.tabs(["Tables", "Solution"])
+tab1, tab2 = st.tabs(["Tables", "Solution"])
 #
-# with tab1:
-#     st.write("Table beverages")
-#     st.dataframe(beverages)
-#     st.write("Table food_items")
-#     st.dataframe(food_items)
+with tab1:
+    exercise_tables = ast.literal_eval(exercise.loc[0, "tables"])
+    for table in exercise_tables:
+        st.write(f"Table: {table}")
+        st.dataframe(con.execute(f"SELECT * FROM {table}"))
+
 #     st.write("Expected")
 #     st.dataframe(solution_df)
 #
-# with tab2:
-#     st.write(answer_str)
+with tab2:
+    exercise_name = exercise.loc[0, "exercise_name"]
+    with open(f"answers/{exercise_name}.sql", "r") as f:
+        answer = f.read()
+    st.write(answer)
